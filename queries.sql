@@ -10,3 +10,5 @@ SELECT name FROM employer WHERE location = "St. Louis City";
 DROP TABLE job;
 
 ## Part 4: Test it with SQL
+-- return a list of names and desc of all skills attached to jobs in alphabetical order. If a skill doesn't have a job listed, it shouldn't be included.
+SELECT name, description FROM skill LEFT JOIN job_skills ON skill.id = job_skills.skills_id WHERE job_skills.job_id IS NOT NULL ORDER BY name ASC;

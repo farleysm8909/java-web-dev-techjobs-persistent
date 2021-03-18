@@ -2,8 +2,10 @@ package org.launchcode.javawebdevtechjobspersistent.controllers;
 
 import org.launchcode.javawebdevtechjobspersistent.models.Employer;
 import org.launchcode.javawebdevtechjobspersistent.models.Job;
+import org.launchcode.javawebdevtechjobspersistent.models.Skill;
 import org.launchcode.javawebdevtechjobspersistent.models.data.EmployerRepository;
 import org.launchcode.javawebdevtechjobspersistent.models.data.JobRepository;
+import org.launchcode.javawebdevtechjobspersistent.models.data.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +28,9 @@ public class HomeController {
     @Autowired
     private JobRepository jobRepository;
 
+    @Autowired
+    private SkillRepository skillRepository;
+
     @RequestMapping("")
     public String index(Model model) {
 
@@ -39,20 +44,24 @@ public class HomeController {
         model.addAttribute("title", "Add Job");
         model.addAttribute(new Job());
         model.addAttribute("employers", employerRepository.findAll()); /* Part 3: update home controller #2. Populates employer dropdown on /add, variable "employers" found in templates/add.html */
+        model.addAttribute("skills", skillRepository.findAll()); // part 4
         return "add";
     }
 
     // students must remove last param if want to see data in table after finishing part 3 #4
     @PostMapping("add")
     public String processAddJobForm(@ModelAttribute @Valid Job newJob,
-                                       Errors errors, Model model, @RequestParam int employerId) { //@RequestParam List<Integer> skills
+                                       Errors errors, Model model, @RequestParam int employerId, @RequestParam List<Integer> skills) { //@RequestParam List<Integer> skills
         if (errors.hasErrors()) {
             model.addAttribute("title", "Add Job");
             //model.addAttribute("employers", employerRepository.findAll()); /* Added this too, for when form fails */
             return "add";
         }
-        Employer selectedEmployer = employerRepository.findById(employerId).orElse(new Employer());        /* Part 3: #4, need .orElse or get Optional error */
+        Employer selectedEmployer = (Employer) employerRepository.findById(employerId).orElse(new Employer());        /* Part 3: #4, need .orElse or get Optional error */
         newJob.setEmployer(selectedEmployer); /* tricky: set employer field of Job object, then save newJob to repo/database */
+
+        List<Skill> selectedSkills = (List<Skill>) skillRepository.findAllById(skills);     /* Part 4 - basically walks you through it */
+        newJob.setSkills(selectedSkills);
 
         jobRepository.save(newJob);
         return "redirect:";
